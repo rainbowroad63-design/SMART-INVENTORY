@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Inventory</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 7px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: 0;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .message {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .success {
+      display: block;
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .error {
+      display: block;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>Smart Inventory</h1>
+    <div class="subtitle">Sign in to manage your products</div>
+
+    <form id="loginForm">
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="Enter your email"
+        required
+      >
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        required
+      >
+
+      <button id="loginButton" type="submit">
+        Sign In
+      </button>
+
+    </form>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://unfiwdfspyxqpsrpknzf.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GANOEduPUoksSrS9CXe4Ew_GfAn9LQA";
+
+    const { createClient } = supabase;
+
+    const client = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const form = document.getElementById("loginForm");
+    const button = document.getElementById("loginButton");
+    const message = document.getElementById("message");
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      button.disabled = true;
+      button.textContent = "Signing in...";
+      message.className = "message";
+
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        showMessage(error.message, "error");
+        button.disabled = false;
+        button.textContent = "Sign In";
+        return;
+      }
+
+      showMessage("Login successful!", "success");
+
+      setTimeout(() => {
+        document.body.innerHTML = `
+          <div style="
+            text-align:center;
+            font-family:Arial,sans-serif;
+            padding:40px;
+          ">
+            <h1>Welcome to Smart Inventory</h1>
+            <p>You are successfully signed in.</p>
+            <p>Inventory dashboard coming next.</p>
+          </div>
+        `;
+      }, 1000);
+    });
+  </script>
+
+</body>
+</html>
