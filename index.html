@@ -1,40 +1,902 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Inventory</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Smart Inventory</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #697386;
+  --border: #e1e5ec;
+  --primary: #2563eb;
+  --danger: #dc2626;
+  --success: #059669;
+}
+
+body.dark {
+  --bg: #111827;
+  --card: #1f2937;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --border: #374151;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: 0.2s;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 24px 16px 50px;
+}
+
+.welcome {
+  margin-bottom: 20px;
+}
+
+.welcome h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.welcome p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.stat-value {
+  font-size: 25px;
+  font-weight: bold;
+  margin-top: 7px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.primary {
+  border: 0;
+  background: var(--primary);
+  color: white;
+  padding: 13px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 11px 15px;
+  border-radius: 10px;
+}
+
+.products {
+  display: grid;
+  gap: 12px;
+}
+
+.product {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 17px;
+}
+
+.product-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.product-info {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 7px;
+  line-height: 1.5;
+}
+
+.quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.qty-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 9px;
+  font-size: 20px;
+}
+
+.qty {
+  min-width: 55px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.product-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.edit-btn {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 9px;
+}
+
+.delete-btn {
+  flex: 1;
+  border: 0;
+  background: var(--danger);
+  color: white;
+  padding: 10px;
+  border-radius: 9px;
+}
+
+.low {
+  color: var(--danger);
+  font-weight: bold;
+}
+
+.empty {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  text-align: center;
+  padding: 45px 20px;
+  color: var(--muted);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  z-index: 100;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.modal-box h2 {
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 13px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 9px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 9px;
+  display: none;
+}
+
+.message.show {
+  display: block;
+}
+
+.message.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.message.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+@media (max-width: 650px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome h1 {
+    font-size: 24px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">Smart Inventory</div>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="icon-btn" id="logoutBtn" title="Logout">↪</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="welcome">
+    <h1>Inventory</h1>
+    <p>Manage your products and stock.</p>
+  </section>
+
+  <div id="message" class="message"></div>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">Products</div>
+      <div class="stat-value" id="productCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Total Stock</div>
+      <div class="stat-value" id="totalStock">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Low Stock</div>
+      <div class="stat-value" id="lowStock">0</div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <h2 style="margin:0;">Products</h2>
+    <button class="primary" id="addBtn">+ Add Product</button>
+  </div>
+
+  <section id="products" class="products"></section>
+
+</main>
+
+<div id="modal" class="modal">
+
+  <div class="modal-box">
+
+    <h2 id="modalTitle">Add Product</h2>
+
+    <div class="form-group">
+      <label>Product Name *</label>
+      <input id="name" type="text" placeholder="Example: MILO 3 IN 1">
+    </div>
+
+    <div class="form-group">
+      <label>SKU</label>
+      <input id="sku" type="text" placeholder="Optional">
+    </div>
+
+    <div class="form-group">
+      <label>Barcode</label>
+      <input id="barcode" type="text" placeholder="Optional">
+    </div>
+
+    <div class="form-group">
+      <label>Category</label>
+      <input id="category" type="text" placeholder="Optional">
+    </div>
+
+    <div class="form-group">
+      <label>Supplier</label>
+      <input id="supplier" type="text" placeholder="Optional">
+    </div>
+
+    <div class="form-group">
+      <label>Quantity</label>
+      <input id="quantity" type="number" min="0" value="0">
+    </div>
+
+    <div class="form-group">
+      <label>Minimum Stock</label>
+      <input id="minimum_stock" type="number" min="0" value="0">
+    </div>
+
+    <div class="form-group">
+      <label>Location</label>
+      <input id="location" type="text" placeholder="Example: Store A">
+    </div>
+
+    <div class="form-group">
+      <label>Unit Cost</label>
+      <input id="unit_cost" type="number" min="0" step="0.01" value="0">
+    </div>
+
+    <div class="modal-buttons">
+      <button class="secondary" id="cancelBtn">Cancel</button>
+      <button class="primary" id="saveBtn">Save Product</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://unfiwdfspyxqpsrpknzf.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+const { createClient } = supabase;
+
+const client = createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+let currentUser = null;
+let editingId = null;
+
+const productsEl = document.getElementById("products");
+const modal = document.getElementById("modal");
+const messageEl = document.getElementById("message");
+
+const fields = [
+  "name",
+  "sku",
+  "barcode",
+  "category",
+  "supplier",
+  "quantity",
+  "minimum_stock",
+  "location",
+  "unit_cost"
+];
+
+function showMessage(text, type) {
+  messageEl.textContent = text;
+  messageEl.className = "message show " + type;
+
+  setTimeout(() => {
+    messageEl.className = "message";
+  }, 3000);
+}
+
+function openModal(product = null) {
+
+  editingId = product ? product.id : null;
+
+  document.getElementById("modalTitle").textContent =
+    product ? "Edit Product" : "Add Product";
+
+  fields.forEach(field => {
+
+    const input = document.getElementById(field);
+
+    if (product) {
+      input.value = product[field] ?? "";
+    } else {
+      input.value =
+        field === "quantity" ||
+        field === "minimum_stock" ||
+        field === "unit_cost"
+          ? "0"
+          : "";
     }
+  });
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+  modal.classList.add("show");
+}
 
-    .card {
-      width: 100%;
-      max-width: 420px;
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
+function closeModal() {
+  modal.classList.remove("show");
+  editingId = null;
+}
 
-    h1 {
-      margin: 0 0 8px;
+async function loadProducts() {
+
+  productsEl.innerHTML =
+    '<div class="empty">Loading products...</div>';
+
+  const { data, error } = await client
+    .from("products")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    productsEl.innerHTML =
+      '<div class="empty">Unable to load products.</div>';
+
+    showMessage(error.message, "error");
+    return;
+  }
+
+  updateStats(data);
+  renderProducts(data);
+}
+
+function updateStats(products) {
+
+  const totalStock = products.reduce(
+    (sum, product) => sum + Number(product.quantity || 0),
+    0
+  );
+
+  const lowStock = products.filter(
+    product =>
+      Number(product.quantity || 0) <=
+      Number(product.minimum_stock || 0)
+  ).length;
+
+  document.getElementById("productCount").textContent =
+    products.length;
+
+  document.getElementById("totalStock").textContent =
+    totalStock;
+
+  document.getElementById("lowStock").textContent =
+    lowStock;
+}
+
+function renderProducts(products) {
+
+  if (!products.length) {
+
+    productsEl.innerHTML = `
+      <div class="empty">
+        <h3>No products yet</h3>
+        <p>Tap "Add Product" to add your first product.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  productsEl.innerHTML = products.map(product => {
+
+    const quantity = Number(product.quantity || 0);
+    const minimum = Number(product.minimum_stock || 0);
+
+    const low =
+      quantity <= minimum && minimum > 0;
+
+    return `
+      <article class="product">
+
+        <div class="product-top">
+
+          <div>
+            <div class="product-name">
+              ${escapeHtml(product.name)}
+            </div>
+
+            <div class="product-info">
+
+              ${product.sku
+                ? `SKU: ${escapeHtml(product.sku)}<br>`
+                : ""}
+
+              ${product.category
+                ? `Category: ${escapeHtml(product.category)}<br>`
+                : ""}
+
+              ${product.location
+                ? `Location: ${escapeHtml(product.location)}`
+                : ""}
+
+            </div>
+          </div>
+
+          ${
+            low
+              ? '<div class="low">LOW STOCK</div>'
+              : ""
+          }
+
+        </div>
+
+        <div class="quantity-row">
+
+          <button
+            class="qty-btn"
+            onclick="changeQuantity('${product.id}', -1)"
+          >−</button>
+
+          <div class="qty">
+            ${quantity}
+          </div>
+
+          <button
+            class="qty-btn"
+            onclick="changeQuantity('${product.id}', 1)"
+          >+</button>
+
+        </div>
+
+        <div class="product-buttons">
+
+          <button
+            class="edit-btn"
+            onclick='editProduct(${JSON.stringify(product)})'
+          >
+            Edit
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deleteProduct('${product.id}')"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </article>
+    `;
+
+  }).join("");
+}
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function saveProduct() {
+
+  const name =
+    document.getElementById("name").value.trim();
+
+  if (!name) {
+    showMessage("Product name is required.", "error");
+    return;
+  }
+
+  const productData = {
+
+    name,
+
+    sku:
+      document.getElementById("sku").value.trim() || null,
+
+    barcode:
+      document.getElementById("barcode").value.trim() || null,
+
+    category:
+      document.getElementById("category").value.trim() || null,
+
+    supplier:
+      document.getElementById("supplier").value.trim() || null,
+
+    quantity:
+      Number(document.getElementById("quantity").value) || 0,
+
+    minimum_stock:
+      Number(document.getElementById("minimum_stock").value) || 0,
+
+    location:
+      document.getElementById("location").value.trim() || null,
+
+    unit_cost:
+      Number(document.getElementById("unit_cost").value) || 0,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  const saveBtn =
+    document.getElementById("saveBtn");
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
+
+  let result;
+
+  if (editingId) {
+
+    result = await client
+      .from("products")
+      .update(productData)
+      .eq("id", editingId)
+      .eq("user_id", currentUser.id);
+
+  } else {
+
+    result = await client
+      .from("products")
+      .insert({
+        ...productData,
+        user_id: currentUser.id
+      });
+  }
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = "Save Product";
+
+  if (result.error) {
+    showMessage(result.error.message, "error");
+    return;
+  }
+
+  closeModal();
+
+  showMessage(
+    editingId
+      ? "Product updated."
+      : "Product added.",
+    "success"
+  );
+
+  await loadProducts();
+}
+
+async function changeQuantity(id, amount) {
+
+  const { data: product, error: findError } =
+    await client
+      .from("products")
+      .select("quantity")
+      .eq("id", id)
+      .eq("user_id", currentUser.id)
+      .single();
+
+  if (findError) {
+    showMessage(findError.message, "error");
+    return;
+  }
+
+  const newQuantity =
+    Math.max(0, Number(product.quantity || 0) + amount);
+
+  const { error } =
+    await client
+      .from("products")
+      .update({
+        quantity: newQuantity,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id)
+      .eq("user_id", currentUser.id);
+
+  if (error) {
+    showMessage(error.message, "error");
+    return;
+  }
+
+  await loadProducts();
+}
+
+async function deleteProduct(id) {
+
+  const confirmed =
+    confirm("Delete this product?");
+
+  if (!confirmed) return;
+
+  const { error } =
+    await client
+      .from("products")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", currentUser.id);
+
+  if (error) {
+    showMessage(error.message, "error");
+    return;
+  }
+
+  showMessage("Product deleted.", "success");
+
+  await loadProducts();
+}
+
+function editProduct(product) {
+  openModal(product);
+}
+
+document.getElementById("addBtn")
+  .addEventListener("click", () => openModal());
+
+document.getElementById("cancelBtn")
+  .addEventListener("click", closeModal);
+
+document.getElementById("saveBtn")
+  .addEventListener("click", saveProduct);
+
+document.getElementById("logoutBtn")
+  .addEventListener("click", async () => {
+
+    await client.auth.signOut();
+
+    window.location.reload();
+
+  });
+
+document.getElementById("themeBtn")
+  .addEventListener("click", () => {
+
+    document.body.classList.toggle("dark");
+
+    const dark =
+      document.body.classList.contains("dark");
+
+    localStorage.setItem(
+      "smart_inventory_theme",
+      dark ? "dark" : "light"
+    );
+
+    document.getElementById("themeBtn").textContent =
+      dark ? "☀️" : "🌙";
+
+  });
+
+if (
+  localStorage.getItem("smart_inventory_theme") === "dark"
+) {
+
+  document.body.classList.add("dark");
+
+  document.getElementById("themeBtn").textContent = "☀️";
+
+}
+
+async function startApp() {
+
+  const { data, error } =
+    await client.auth.getSession();
+
+  if (error || !data.session) {
+
+    window.location.href = "login.html";
+
+    return;
+  }
+
+  currentUser = data.session.user;
+
+  await loadProducts();
+}
+
+startApp();
+
+</script>
+
+</body>
+</html>      margin: 0 0 8px;
       text-align: center;
       font-size: 28px;
     }
