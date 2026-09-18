@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Inventory - Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #697386;
+  --border: #e1e5ec;
+  --primary: #2563eb;
+  --danger: #dc2626;
+}
+
+body.dark {
+  --bg: #111827;
+  --card: #1f2937;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --border: #374151;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: 30px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+h1 {
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  margin: 14px 0 7px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--primary);
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+.message {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.message.show {
+  display: block;
+}
+
+.message.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.theme {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>Smart Inventory</h1>
+
+  <div class="subtitle">
+    Sign in to manage your products
+  </div>
+
+  <form id="loginForm">
+
+    <label for="email">Email</label>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter your email"
+      required
+    >
+
+    <label for="password">Password</label>
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter your password"
+      required
+    >
+
+    <button id="loginBtn" type="submit">
+      Sign In
+    </button>
+
+  </form>
+
+  <div id="message" class="message"></div>
+
+  <button class="theme" id="themeBtn">
+    🌙 Toggle Dark Mode
+  </button>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://unfiwdfspyxqpsrpknzf.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_GANOEduPUoksSrS9CXe4Ew_GfAn9LQA";
+
+const { createClient } = supabase;
+
+const client = createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+const form =
+  document.getElementById("loginForm");
+
+const loginBtn =
+  document.getElementById("loginBtn");
+
+const message =
+  document.getElementById("message");
+
+function showError(text) {
+
+  message.textContent = text;
+  message.className = "message show error";
+
+}
+
+form.addEventListener("submit", async event => {
+
+  event.preventDefault();
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Signing in...";
+  message.className = "message";
+
+  const { data, error } =
+    await client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if (error) {
+
+    showError(error.message);
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Sign In";
+
+    return;
+  }
+
+  window.location.href = "index.html";
+
+});
+
+document.getElementById("themeBtn")
+  .addEventListener("click", () => {
+
+    document.body.classList.toggle("dark");
+
+    const dark =
+      document.body.classList.contains("dark");
+
+    localStorage.setItem(
+      "smart_inventory_theme",
+      dark ? "dark" : "light"
+    );
+
+  });
+
+if (
+  localStorage.getItem("smart_inventory_theme") === "dark"
+) {
+  document.body.classList.add("dark");
+}
+
+</script>
+
+</body>
+</html>
